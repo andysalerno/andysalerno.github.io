@@ -1,5 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="https://andysalerno.com/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.4.0">Jekyll</generator><link href="https://andysalerno.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andysalerno.com/" rel="alternate" type="text/html" /><updated>2017-01-27T22:30:30-08:00</updated><id>https://andysalerno.com//</id><title type="html">/dev/null</title><subtitle>Hello from ~~Chicago~~ ~~St. Louis~~ ~~Kansas City~~ the pacific northwest.
-</subtitle><entry><title type="html">Winning Reversi with Monte Carlo Tree Search</title><link href="https://andysalerno.com/2016/03/Monte-Carlo-Reversi" rel="alternate" type="text/html" title="Winning Reversi with Monte Carlo Tree Search" /><published>2016-03-24T00:00:00-07:00</published><updated>2016-03-24T00:00:00-07:00</updated><id>https://andysalerno.com/2016/03/Monte-Carlo-Reversi</id><content type="html" xml:base="https://andysalerno.com/2016/03/Monte-Carlo-Reversi">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot;&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="https://andysalerno.com/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.4.0">Jekyll</generator><link href="https://andysalerno.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://andysalerno.com/" rel="alternate" type="text/html" /><updated>2017-01-30T01:10:08-08:00</updated><id>https://andysalerno.com//</id><title type="html">/dev/null</title><subtitle>Documenting my long- and short-term obsessions.
+</subtitle><entry><title type="html">Compiling Python</title><link href="https://andysalerno.com/Compiling-Python" rel="alternate" type="text/html" title="Compiling Python" /><published>2017-01-28T00:00:00-08:00</published><updated>2017-01-28T00:00:00-08:00</updated><id>https://andysalerno.com/Compiling-Python</id><content type="html" xml:base="https://andysalerno.com/Compiling-Python">&lt;h1 id=&quot;compiling-python-extensions-on-windows-in-2017&quot;&gt;Compiling Python extensions on Windows (in 2017)&lt;/h1&gt;
+
+&lt;p&gt;Lately I’ve returned to my Monte Carlo tree search project, which is an implementation in Python of the Monte Carlo tree search method, applied to the game of Reversi (aka Othello).&lt;/p&gt;
+
+&lt;p&gt;Because the success of the Monte Carlo game agent is directly tied to how quickly it can churn through simulations, I decided to try compiling it with Cython.  It turns out doing so effectively doubles the speed of my agent.  I think this speed boost is primarily due to how I can compute using raw C integers instead of “Python Object integers”.  Or maybe it is some Compiler Magic(TM), or both.&lt;/p&gt;
+
+&lt;p&gt;Compiling Cython-generated .c files on Windows is relatively straightforward nowadays.  There is a lot of information out there documenting how to do this with older versions of Visual Studio, or older versions of Python.  Here’s what I have found to be the best way to do it with modern tools today, in 2017.  (I’m assuming these instructions are valid for any kind of Python C extensions, but I have only tested with Cython files.)&lt;/p&gt;
+
+&lt;h3 id=&quot;compiling-cython-c-or-c-extensions-on-windows&quot;&gt;Compiling Cython C (or C extensions) on Windows&lt;/h3&gt;
+&lt;p&gt;I am using Python 3.6.0 64bit on Windows 10 64bit, with Cython 0.25.2 installed via &lt;code class=&quot;highlighter-rouge&quot;&gt;pip install cython&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;First, for good measure, let’s compile our .pyx file into a .c file using Cython:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cython -3 board.pyx -o board.c&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now we have our C file to compile.&lt;/p&gt;
+
+&lt;h4 id=&quot;download-visual-c-build-tools-2015&quot;&gt;Download Visual C++ Build Tools 2015&lt;/h4&gt;
+
+&lt;p&gt;We will get our compiler not from installing Visual Studio, but from the new &lt;a href=&quot;http://landinghub.visualstudio.com/visual-cpp-build-tools&quot;&gt;&lt;strong&gt;Visual C++ Build Tools 2015&lt;/strong&gt;&lt;/a&gt;.  Note that a preview for 2017 is available, but Python 3.6.0 was compiled against MSVC v.1900, which &lt;a href=&quot;https://en.wikipedia.org/wiki/Visual_C%2B%2B#Common_MSVC_version&quot;&gt;corresponds to Visual Studio 2015&lt;/a&gt; (2017 may also work, I do not know if the runtime changed).&lt;/p&gt;
+
+&lt;p&gt;This install should be about 4gb, compared to around 11gb if we had installed the full Visual Studio.  &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx&quot;&gt;If you already have Visual Studio installed, you should already have these tools installed.&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Once the Build Tools are installed, navigate to the install location (for me, &lt;code class=&quot;highlighter-rouge&quot;&gt;C:\Program Files (x86)\Microsoft Visual C++ Build Tools&lt;/code&gt;).  You should see a group of shortcuts that will launch different environments, each prepared to compile for a different target.  Open the one relevant to you (&lt;a href=&quot;https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx#Anchor_0&quot;&gt;you can read about the exact target specifications here&lt;/a&gt;).  Of course, most people in 2017 will want the x64 native target.&lt;/p&gt;
+
+&lt;h4 id=&quot;compile&quot;&gt;Compile&lt;/h4&gt;
+&lt;p&gt;Once the environment comes up, change directory to the dir with your C extension file.&lt;/p&gt;
+
+&lt;p&gt;You will need to include the Python.h header during compilation, and you must also link in the Python lib file.  The syntax you want looks like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cl /LD /I[directory with Python.h] [your C file] [the python36.lib file]&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;As an example, here was the full command I ran to compile my file &lt;code class=&quot;highlighter-rouge&quot;&gt;board.c&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cl /LD /IC:\Users\Andy\AppData\Local\Programs\Python\Python36\include board.c C:\Users\Andy\AppData\Local\Programs\Python\Python36\libs\python36.lib&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;If you receive any errors, check to make sure you are targeting the correct architecture – you need to be using the exact same target as the version of Python you are running against.  If you are on a 64 bit machine but running a 32 bit version of Python, then you must target x86, etc.  Change targets by switching to the correct environment shortcut.&lt;/p&gt;
+
+&lt;p&gt;After this command completes, you should see some new files in your directory.  After compiling &lt;code class=&quot;highlighter-rouge&quot;&gt;board.c&lt;/code&gt;, I see &lt;code class=&quot;highlighter-rouge&quot;&gt;board.exp&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;board.lib&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;board.obj&lt;/code&gt;, and &lt;code class=&quot;highlighter-rouge&quot;&gt;board.dll&lt;/code&gt;.  We can dispose of everything but the &lt;code class=&quot;highlighter-rouge&quot;&gt;.dll&lt;/code&gt; file.  Since compiled Python extensions expect to have the file extension &lt;code class=&quot;highlighter-rouge&quot;&gt;.pyd&lt;/code&gt;, we must change the name of &lt;code class=&quot;highlighter-rouge&quot;&gt;board.dll&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;board.pyd&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;run-it&quot;&gt;Run it&lt;/h4&gt;
+
+&lt;p&gt;Whenever I compile an extension module for Python, I hide/rename the existing &lt;code class=&quot;highlighter-rouge&quot;&gt;.py&lt;/code&gt; file, so I know that when my program executes it is definitely calling the extension and not the vanilla Python file.  Hopefully, after following these steps, your program runs – and hopefully it runs faster.&lt;/p&gt;
+
+&lt;p&gt;I don’t have a comments section, email me with any questions.&lt;/p&gt;
+
+&lt;h4 id=&quot;notes&quot;&gt;Notes&lt;/h4&gt;
+
+&lt;p&gt;These steps documented compiling a cython file ‘by hand’ with the Windows compiler cl.  If instead you are interested in setting up a Python package with a &lt;code class=&quot;highlighter-rouge&quot;&gt;setup.py&lt;/code&gt; and distutils, &lt;a href=&quot;https://wiki.python.org/moin/WindowsCompilers#Compilers_Installation_and_configuration&quot;&gt;read here.&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I referenced &lt;a href=&quot;http://stevedower.id.au/blog/building-for-python-3-5/&quot;&gt;this great writeup about evolving C/C++ runtimes&lt;/a&gt; by Steve Dower.  It is also very helpful with understanding the situation of linking Python extensions statically or dynamically with MSVCRT.&lt;/p&gt;</content><summary type="html">Compiling Python extensions on Windows (in 2017)</summary></entry><entry><title type="html">Winning Reversi with Monte Carlo Tree Search</title><link href="https://andysalerno.com/Monte-Carlo-Reversi" rel="alternate" type="text/html" title="Winning Reversi with Monte Carlo Tree Search" /><published>2016-03-24T00:00:00-07:00</published><updated>2016-03-24T00:00:00-07:00</updated><id>https://andysalerno.com/Monte-Carlo-Reversi</id><content type="html" xml:base="https://andysalerno.com/Monte-Carlo-Reversi">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot;&gt;
 
 &lt;html&gt;
 &lt;head&gt;
